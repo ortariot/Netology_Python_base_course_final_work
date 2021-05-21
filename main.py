@@ -20,6 +20,8 @@
 #             '05' : 'is canceled'          
 #         }
 
+
+import datetime
 import requests 
 from pprint import pprint
 from yadrive import YaDrive
@@ -45,12 +47,8 @@ req = requests.get(purl, params=parametrs)
 
 photo_base = req.json()['response']['items']
 for entry in photo_base:
+  
+    date = datetime.datetime.utcfromtimestamp(entry['date']).strftime('%Y-%m-%d %H:%M:%S')
+    print(date)
     disck.upload_from_url(entry['photo_2560'],f"{entry['likes']['count']}" + '.jpg')
-
-
-
-
-
-
-
 
