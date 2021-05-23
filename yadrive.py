@@ -76,8 +76,6 @@ class YaDrive:
 if __name__ == '__main__':
     token = ''
     disck = YaDrive(token, '/test_app/')
-    # upload_url = 'https://sun9-12.userapi.com/impf/c621705/v621705348/2701/4T6pKaCSUtA.jpg?size=1280x960&quality=96&sign=aa9a2f011b23ba4acf40d82f342dd06d&c_uniq_tag=1aeiBaV9by9I9rlblesgaLgErFist0_UfUu8PVXbPrc&type=album'
-    # disck.upload_from_url(upload_url, 'test_photo.jpg')
     disck.download_from_cloud('40.jpg')
 
 
