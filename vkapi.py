@@ -1,4 +1,6 @@
 import requests
+from pprint import pprint
+
 
 class VkClient():
 
@@ -21,6 +23,8 @@ class VkClient():
 if __name__ == '__main__':
     test_token = '958eb5d439726565e9333aa30e50e0f937ee432e927f0dbd541c541887d919a7c56f95c04217915c32008'
     id = ''
-    album_id = 'profile'
+    album_id = 'wall'
     vk_user = VkClient(test_token)
-    print(vk_user.get_photos(id, album_id))
+    items = vk_user.get_photos(id, album_id)
+                
+    pprint(vk_user.get_photos(id, album_id))

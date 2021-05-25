@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # PyQt5 design class
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -10,7 +9,7 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(750, 590)
         MainWindow.setMinimumSize(QtCore.QSize(750, 590))
-        MainWindow.setMaximumSize(QtCore.QSize(750, 590))
+        MainWindow.setMaximumSize(QtCore.QSize(1000, 800))
         MainWindow.setToolButtonStyle(QtCore.Qt.ToolButtonFollowStyle)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setEnabled(True)
@@ -20,9 +19,9 @@ class Ui_MainWindow(object):
         self.centralwidget.setFont(font)
         self.centralwidget.setObjectName("centralwidget")
         self.frame_13 = QtWidgets.QFrame(self.centralwidget)
-        self.frame_13.setGeometry(QtCore.QRect(0, 0, 750, 550))
+        self.frame_13.setGeometry(QtCore.QRect(0, 0, 1000, 800))
         self.frame_13.setMinimumSize(QtCore.QSize(750, 550))
-        self.frame_13.setMaximumSize(QtCore.QSize(750, 550))
+        self.frame_13.setMaximumSize(QtCore.QSize(1000, 800))
         self.frame_13.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
         self.frame_13.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_13.setFrameShadow(QtWidgets.QFrame.Raised)
@@ -103,7 +102,6 @@ class Ui_MainWindow(object):
         self.textEdit_4.setMinimumSize(QtCore.QSize(0, 32))
         self.textEdit_4.setMaximumSize(QtCore.QSize(300, 32))
         self.textEdit_4.setObjectName("textEdit_4")
-       
         self.horizontalLayout_4.addWidget(self.textEdit_4)
         self.verticalLayout_2.addWidget(self.frame_4)
         self.frame_9 = QtWidgets.QFrame(self.frame_8)
