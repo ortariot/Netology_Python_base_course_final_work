@@ -36,6 +36,7 @@ import design
 
 class LogicalLair():
 
+    
     def get_max_res(self, item):
         out = 0
         for sl in item:
@@ -45,19 +46,10 @@ class LogicalLair():
                     out = value
         return f"photo_{out}"
 
-    def transport_from_vk_to_clud(self, vk_token, owner_id, album_id, clud_token, qty=None):
-        logging.info('Start vk to cloud process')  
-        vk_clien = VkClient(vk_token)
-        logging.info('Connection to vk')
-        photo_base = vk_clien.get_photos(owner_id, album_id)
-        logging.info(f'{len(photo_base)} photos found')
-        # pprint(photo_base)
-        logging.info('Connection to YaDrive')
-        disck = YaDrive(clud_token, '/test_app/')
-        logging.info('Getting folder list')
-        folder_list = disck.get_files_list()
+    def get_status_data(self):
+        folder_list = self.disck.get_files_list()
         if 'status.json' in folder_list:
-            disck.download_from_cloud('status.json')
+            self.disck.download_from_cloud('status.json')
             with open('status.json') as f:
                 files_data = json.load(f)  
             logging.info('Folder list obtained from clud')
@@ -67,32 +59,52 @@ class LogicalLair():
             'items' : []
             }
             logging.info('Creating new Folder list')
-        
-        for num, entry in enumerate(reversed(photo_base)):
-            if entry['date'] > files_data['last_update']:
-                photo_name = f"{entry['likes']['count']}" + '.jpg'
-                if photo_name in folder_list:
-                    # обратить внимание ошибка с именами файлов
-                    print('file again in folder list')
-                    date = datetime.datetime.utcfromtimestamp(entry['date']).strftime('-%d-%m-%Y')
-                    photo_name = f"{entry['likes']['count']}" + date + '.jpg'       
-                
-                up_code = disck.upload_from_url(entry[self.get_max_res(entry)], photo_name)
-                if qty is not None and num == qty:
-                    break
-                logging.info(f'{photo_name} uploading to cloud')
-                if up_code == 200:
-                    files_data['items'].append({"file_name": photo_name, "size": f"{entry['height']} x {entry['width']} " })
-            else: 
-                logging.info('Remaining files have already been written to disk')
-                break
+        return files_data
 
-        files_data['last_update'] = int(time.time())
-        logging.info('Uploading to cloud status file')
-        with open('status.json', 'w', encoding='utf-8') as f:
-            json.dump(files_data, f, indent=2)
-        disck.upload_from_drive('status.json')
-        logging.info('Uploading is sucsessfull')
+
+    def transport_from_vk_to_clud(self, vk_token, owner_id, album_id, clud_token, qty=None):
+        logging.info('Start vk to cloud process')  
+        vk_clien = VkClient(vk_token)
+        logging.info('Connection to vk')
+        photo_base = vk_clien.get_photos(owner_id, album_id)
+        if 'response' in photo_base:
+            logging.info(f'{len(photo_base)} photos found')
+            logging.info('Connection to YaDrive')
+            self.disck = YaDrive(clud_token, '/test_app2/')
+            logging.info('Getting folder list')
+            files_data = self.get_status_data()
+            files_count = len(files_data['items'])
+            tmp_photo_list = [file['file_name'] for file in files_data['items']]
+            id_list = [file['id'] for file in files_data['items']]
+            
+            for entry in reversed(photo_base):
+                if entry['id'] not in id_list:
+                    photo_name = f"{entry['likes']['count']}" + '.jpg'
+                    if photo_name in tmp_photo_list:
+                        date = datetime.datetime.utcfromtimestamp(entry['date']).strftime('-%d-%m-%Y-%H-%M-%S')
+                        photo_name = f"{entry['likes']['count']}" + date + '.jpg'       
+                    tmp_photo_list.append(photo_name)
+                    up_code = self.disck.upload_from_url(entry[self.get_max_res(entry)], photo_name)
+                    logging.info(f'{photo_name} uploading to cloud')
+                    if up_code == 200:
+                        files_data['items'].append({"file_name": photo_name, "id" : entry['id'],  "size": f"{entry['height']} x {entry['width']} " })
+                        if qty is not None and len(tmp_photo_list) - files_count == qty:
+                            print(tmp_photo_list)
+                            break
+                else: 
+                    logging.info('This files already been written to disk')
+        
+
+            files_data['last_update'] = int(time.time())
+            logging.info('Uploading to cloud status file')
+            with open('status.json', 'w', encoding='utf-8') as f:
+                json.dump(files_data, f, indent=2)
+            self.disck.upload_from_drive('status.json')
+            logging.info('Uploading is sucsessfull')
+        elif 'error' in photo_base:
+            print(f"error - {photo_base['error']['error_msg']}")
+        else:
+            print('error - undefined error')
 
 
 
@@ -173,7 +185,7 @@ def main():
 
 
 if __name__ == '__main__':
-    # logging.basicConfig(level=logging.INFO, format='log: %(name)s - %(message)s')
+    logging.basicConfig(level=logging.INFO, format='log: %(name)s - %(message)s')
     test_token = '958eb5d439726565e9333aa30e50e0f937ee432e927f0dbd541c541887d919a7c56f95c04217915c32008'
     ya_token = ''
     id = ''

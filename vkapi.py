@@ -17,7 +17,13 @@ class VkClient():
         }
         url = 'https://api.vk.com/method/photos.get'
         req = requests.get(url, params=parametrs)
-        return req.json()['response']['items']
+        return req.json()
+        # if 'response' in req.json():
+        #     return req.json()['response']['items']
+        # elif 'error' in req.json():
+        #     return f"error - {req.json()['error']['error_msg']}"}
+        # else:
+        #     return 'error - undefined error'
     
 
 if __name__ == '__main__':

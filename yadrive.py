@@ -23,6 +23,7 @@ class YaDrive:
             'limit' : 1000
         }
         response = requests.get(files_url, headers=headers, params=parametrs)
+        print(response.json())
         files = [file['name'] for file in response.json()['_embedded']['items']]
         return files
 
