@@ -23,7 +23,7 @@ class YaDrive:
             'limit' : 1000
         }
         response = requests.get(files_url, headers=headers, params=parametrs)
-        print(response.json())
+        # pprint(response.json())
         files = [file['name'] for file in response.json()['_embedded']['items']]
         return files
 
@@ -68,6 +68,23 @@ class YaDrive:
         req = requests.get(download_link)
         with open(filename, 'wb') as f:
             f.write(req.content)
+    
+    def create_folder(self, folder_name):
+        url = 'https://cloud-api.yandex.net/v1/disk/resources'
+        params = {
+            'path' : folder_name
+        }
+        req = requests.put(url, headers=self.get_headers(), params=params)
+        return req.json()    
+    
+    def create_path_to_folder(self, path):
+        if path[0] != '/':
+            path = '/' + path
+
+        for folder in path.split('/'):
+            if folder == '':
+                folder = '/'
+            print(self.get_files_list(folder))
 
 
 
@@ -77,7 +94,15 @@ class YaDrive:
 if __name__ == '__main__':
     token = ''
     disck = YaDrive(token, '/test_app/')
-    disck.download_from_cloud('40.jpg')
+    # disck.download_from_cloud('40.jpg')
+    # rq = disck.create_folder('test_app/bababa')
+    # print(rq)
+    print(disck.get_files_list('/'))
+    # a = '/test_app/bababa'
+    # print(a.split("/"))
+
+    disck.create_path_to_folder('/test_app/25')
+
 
 
 
