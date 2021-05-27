@@ -46,37 +46,52 @@ class LogicalLair():
                     out = value
         return f"photo_{out}"
 
-    def get_status_data(self):
-        folder_list = self.disck.get_files_list()
+    def get_status_data(self, path, text_log):
+        folder_list = self.disck.get_files_list(path)['files']
         if 'status.json' in folder_list:
-            self.disck.download_from_cloud('status.json')
+            self.disck.download_from_cloud('status.json', path)
             with open('status.json') as f:
                 files_data = json.load(f)  
-            logging.info('Folder list obtained from clud')
+
+            text_log.setText('Folder list obtained from clud')
+            # logging.info('Folder list obtained from clud')
         else:    
             files_data = {
             'last_update' : 0,
             'items' : []
             }
-            logging.info('Creating new Folder list')
+            # logging.info('Creating new Folder list')
+            text_log.setText('Creating new Folder list')
         return files_data
 
 
-    def transport_from_vk_to_clud(self, vk_token, owner_id, album_id, clud_token, qty=None):
-        logging.info('Start vk to cloud process')  
+    def transport_from_vk_to_cloud(self, vk_token, owner_id, album_id, clud_token, cloud_path, qty=None, text_log=None, p_bar=None):
+        # logging.info('Start vk to cloud process')  
+        text_log.setText('Start vk to cloud process')
         vk_clien = VkClient(vk_token)
-        logging.info('Connection to vk')
+        # logging.info('Connection to vk')
+        text_log.setText('Connection to vk')
         photo_base = vk_clien.get_photos(owner_id, album_id)
+        progress = 10
+        p_bar.setProperty("value", progress)
         if 'response' in photo_base:
-            logging.info(f'{len(photo_base)} photos found')
-            logging.info('Connection to YaDrive')
-            self.disck = YaDrive(clud_token, '/test_app2/')
-            logging.info('Getting folder list')
-            files_data = self.get_status_data()
+            photo_base = photo_base['response']['items']
+            text_log.setText(f'{len(photo_base)} photos found')
+            p_quant = 90/qty - 1 if qty is not None else 90/len(photo_base) - 1
+            text_log.setText('Connection to YaDrive')
+            # logging.info(f'{len(photo_base)} photos found')
+            # logging.info('Connection to YaDrive')
+            self.disck = YaDrive(clud_token)
+            cp = self.disck.get_files_list(cloud_path)
+            if cp['code'] == 404:
+                self.disck.create_path_to_folder(cloud_path)
+            # logging.info('Getting folder list')
+            text_log.setText('Getting folder list')
+            files_data = self.get_status_data(cloud_path, text_log)
             files_count = len(files_data['items'])
             tmp_photo_list = [file['file_name'] for file in files_data['items']]
             id_list = [file['id'] for file in files_data['items']]
-            
+
             for entry in reversed(photo_base):
                 if entry['id'] not in id_list:
                     photo_name = f"{entry['likes']['count']}" + '.jpg'
@@ -84,27 +99,33 @@ class LogicalLair():
                         date = datetime.datetime.utcfromtimestamp(entry['date']).strftime('-%d-%m-%Y-%H-%M-%S')
                         photo_name = f"{entry['likes']['count']}" + date + '.jpg'       
                     tmp_photo_list.append(photo_name)
-                    up_code = self.disck.upload_from_url(entry[self.get_max_res(entry)], photo_name)
-                    logging.info(f'{photo_name} uploading to cloud')
+                    up_code = self.disck.upload_from_url(entry[self.get_max_res(entry)], photo_name, cloud_path)
+                    # logging.info(f'{photo_name} uploading to cloud')
+                    text_log.setText(f'{photo_name} uploading to cloud')
+                    progress += p_quant
+                    p_bar.setProperty("value", progress)
                     if up_code == 200:
                         files_data['items'].append({"file_name": photo_name, "id" : entry['id'],  "size": f"{entry['height']} x {entry['width']} " })
                         if qty is not None and len(tmp_photo_list) - files_count == qty:
-                            print(tmp_photo_list)
                             break
                 else: 
-                    logging.info('This files already been written to disk')
+                    # logging.info('This files already been written to disk')
+                    text_log.setText('This files already been written to disk')
         
 
             files_data['last_update'] = int(time.time())
-            logging.info('Uploading to cloud status file')
+            text_log.setText('Uploading to cloud status file')
+            # logging.info('Uploading to cloud status file')
             with open('status.json', 'w', encoding='utf-8') as f:
                 json.dump(files_data, f, indent=2)
-            self.disck.upload_from_drive('status.json')
-            logging.info('Uploading is sucsessfull')
+            self.disck.upload_from_drive('status.json', cloud_path)
+            text_log.setText('Uploading is sucsessfull')
+            # logging.info('Uploading is sucsessfull')
+            p_bar.setProperty("value", 100)
         elif 'error' in photo_base:
-            print(f"error - {photo_base['error']['error_msg']}")
+            text_log.setText(f"error - {photo_base['error']['error_msg']}")
         else:
-            print('error - undefined error')
+            text_log.setText('error - undefined error')
 
 
 
@@ -157,16 +178,17 @@ class WindowsForms(QtWidgets.QMainWindow, design.Ui_MainWindow):
         yd_token = self.textEdit_2.toPlainText()
         yd_path = self.textEdit_5.toPlainText()       
         self.__set_settings(vk_token, vk_id, vk_album, yd_token, yd_path)
-    
+        self.progressBar.setProperty("value", 0)
         if self.checkBox.isChecked():
             numbe_of_photo = self.spinBox.value()
         else:
             numbe_of_photo = None
-
-        # self.l_layуr.transport_from_vk_to_clud(vk_token, vk_id, vk_album, yd_token, numbe_of_photo)
+        
+        # print(vk_album)
+        self.l_layуr.transport_from_vk_to_cloud(vk_token, vk_id, vk_album, yd_token, yd_path, numbe_of_photo, self.label_3, self.progressBar)
 
         # print(numbe_of_photo)
-        self.label_3.setText(vk_album)
+        # self.label_3.setText(vk_album)
         # print(self.listWidget.item(0))
 
 
@@ -185,13 +207,10 @@ def main():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO, format='log: %(name)s - %(message)s')
-    test_token = '958eb5d439726565e9333aa30e50e0f937ee432e927f0dbd541c541887d919a7c56f95c04217915c32008'
-    ya_token = ''
-    id = ''
-    album_id = 'wall'
-    ll = LogicalLair()
-    ll.transport_from_vk_to_clud(test_token, id, album_id, ya_token, 10)
-
-
-    # main()
+    # logging.basicConfig(level=logging.INFO, format='log: %(name)s - %(message)s')
+    # test_token = ''
+    # ya_token = ''
+    # id = ''
+    # ll = LogicalLair()
+    # ll.transport_from_vk_to_cloud(test_token, id, album_id, ya_token, '/kukusik/kukusik/', 10)
+    main()
