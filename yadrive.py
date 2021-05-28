@@ -106,17 +106,7 @@ class YaDrive:
 
 
 if __name__ == '__main__':
-    token = 'AQAAAAAKRLFpAADLW2fzaHlsdk-GmbND08s4yJE'
-    disck = YaDrive(token, '/test_app/')
-    # disck.download_from_cloud('40.jpg')
-    # rq = disck.create_folder('test_app/bababa')
-    # print(rq)
-    print(disck.get_files_list('test_app'))
-    # a = '/'
-    # print(a[len(a)])
-
-    # disck.create_path_to_folder('/Privet Yandex/huyandex/haahaa')
-    
+    pass
 
 
 

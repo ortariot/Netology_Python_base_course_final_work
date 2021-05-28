@@ -22,9 +22,5 @@ class VkClient():
     
 
 if __name__ == '__main__':
-    test_token = ''
-    # id = ''
-    # album_id = 'wall'
-    # vk_user = VkClient(test_token)
-    # items = vk_user.get_photos(id, album_id)
+    pass
                 
