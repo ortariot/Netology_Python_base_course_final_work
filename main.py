@@ -7,6 +7,7 @@ from vkapi import VkClient
 import sys
 from PyQt5 import QtWidgets
 import design
+import threading
 
 
 class LogicalLair():
@@ -182,8 +183,16 @@ class WindowsForms(QtWidgets.QMainWindow, design.Ui_MainWindow):
         else:
             numbe_of_photo = None
 
-        self.l_layуr.transport_from_vk_to_cloud(vk_token, vk_id, vk_album, yd_token, 
-                            yd_path, numbe_of_photo, self.label_3, self.progressBar)
+        upload_process_thread = \
+        threading.Thread(target=self.l_layуr.transport_from_vk_to_cloud,
+                     args=(vk_token, vk_id, vk_album, yd_token, yd_path, 
+                      numbe_of_photo, self.label_3, self.progressBar))
+        
+        upload_process_thread.start()
+
+
+        
+
 
     def check_box_action(self):
         if self.checkBox.isChecked():
@@ -199,4 +208,5 @@ def main():
     app.exec_() 
 
 if __name__ == '__main__':
-    main()
+    main_thread = threading.Thread(target=main)
+    main_thread.start()
