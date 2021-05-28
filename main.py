@@ -6,7 +6,7 @@ from yadrive import YaDrive
 from vkapi import VkClient
 import sys
 from PyQt5 import QtWidgets
-import design
+import designtwo
 import threading
 
 
@@ -118,6 +118,9 @@ class LogicalLair():
            
             text_log.setText('Uploading is sucsessfull')
             p_bar.setProperty("value", 100)
+            time.sleep(5)
+            text_log.setText('ready')
+            p_bar.setProperty("value", 0)
         elif 'error' in photo_base:
             text_log.setText(f"error - {photo_base['error']['error_msg']}")
         else:
@@ -125,37 +128,37 @@ class LogicalLair():
 
 
 
-class WindowsForms(QtWidgets.QMainWindow, design.Ui_MainWindow):
+class WindowsForms(QtWidgets.QMainWindow, designtwo.Ui_MainWindow):
 
     def __init__(self):
         super().__init__()
         self.setupUi(self) 
         self.__preset()
-        self.pushButton.clicked.connect(self.but_action)
+        self.start_pushButton.clicked.connect(self.but_action)
         self.checkBox.clicked.connect(self.check_box_action)
         self.l_layуr = LogicalLair()
     
     # listWidget get items; default item == profile
     def __listWidget_get_item(self):
-        if self.listWidget.selectedItems():
-            if self.listWidget.selectedItems()[0] == self.listWidget.item(1):
-                return self.listWidget.item(1).text()
-            elif self.listWidget.selectedItems()[0] == self.listWidget.item(2):
-                return self.listWidget.item(2).text()
+        if self.vk_album_listWidget.selectedItems():
+            if self.vk_album_listWidget.selectedItems()[0] == self.vk_album_listWidget.item(1):
+                return self.vk_album_listWidget.item(1).text()
+            elif self.vk_album_listWidget.selectedItems()[0] == self.vk_album_listWidget.item(2):
+                return self.vk_album_listWidget.item(2).text()
             else:
-                return self.listWidget.item(0).text()
+                return self.vk_album_listWidget.item(0).text()
         else:
-            return self.listWidget.item(0).text()
+            return self.vk_album_listWidget.item(0).text()
 
     def __preset(self):
         dir_list = os.listdir()
         if 'settings.json' in dir_list:
             with open('settings.json', 'r', encoding='utf-8') as f:
                 settings = json.load(f)
-            self.textEdit.setText(settings['vk_token']) 
-            self.textEdit_4.setText(settings['vk_id']) 
-            self.textEdit_2.setText(settings['yd_token']) 
-            self.textEdit_5.setText(settings['yd_path']) 
+            self.vk_token_textEdit.setText(settings['vk_token'])
+            self.vk_usr_id_textEdit.setText(settings['vk_id']) 
+            self.yd_token_textEdit.setText(settings['yd_token']) 
+            self.yd_path_textEdit.setText(settings['yd_path']) 
     
     def __set_settings(self, vk_token, vk_id, vk_album, yd_token, yd_path):
         settings = {
@@ -169,11 +172,11 @@ class WindowsForms(QtWidgets.QMainWindow, design.Ui_MainWindow):
             json.dump(settings, f, indent=2)
 
     def but_action(self):
-        vk_token = self.textEdit.toPlainText()
-        vk_id = self.textEdit_4.toPlainText()
+        vk_token = self.vk_token_textEdit.toPlainText()
+        vk_id = self.vk_usr_id_textEdit.toPlainText()
         vk_album = self.__listWidget_get_item()
-        yd_token = self.textEdit_2.toPlainText()
-        yd_path = self.textEdit_5.toPlainText()    
+        yd_token = self.yd_token_textEdit.toPlainText()  
+        yd_path = self.yd_path_textEdit.toPlainText()   
 
         self.__set_settings(vk_token, vk_id, vk_album, yd_token, yd_path)
         self.progressBar.setProperty("value", 0)
@@ -186,7 +189,7 @@ class WindowsForms(QtWidgets.QMainWindow, design.Ui_MainWindow):
         upload_process_thread = \
         threading.Thread(target=self.l_layуr.transport_from_vk_to_cloud,
                      args=(vk_token, vk_id, vk_album, yd_token, yd_path, 
-                      numbe_of_photo, self.label_3, self.progressBar))
+                      numbe_of_photo, self.label_9, self.progressBar))
         
         upload_process_thread.start()
 
