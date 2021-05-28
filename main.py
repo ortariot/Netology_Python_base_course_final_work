@@ -5,12 +5,16 @@ import json
 from yadrive import YaDrive
 from vkapi import VkClient
 import sys
-from PyQt5 import QtWidgets
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 import designtwo
 import threading
 
 
-class LogicalLair():
+class LogicalLair(QtWidgets.QDialog):
+    # q signals:
+    changed_value = pyqtSignal(int)
+    changed_log = pyqtSignal(str)
 
     def get_max_res(self, item):
         out = 0
@@ -21,25 +25,24 @@ class LogicalLair():
                     out = value
         return f"photo_{out}"
 
-    def get_status_data(self, path, text_log):
+    def get_status_data(self, path):
         folder_list = self.disck.get_files_list(path)['files']
         if 'status.json' in folder_list:
             self.disck.download_from_cloud('status.json', path)
             with open('status.json') as f:
                 files_data = json.load(f)  
-
-            text_log.setText('Folder list obtained from clud')
+            self.changed_log.emit('Folder list obtained from clud')
         else:    
             files_data = {
             'last_update' : 0,
             'items' : []
             }
-            text_log.setText('Creating new Folder list')
+            self.changed_log.emit('Creating new Folder list')
         return files_data
 
 
     def transport_from_vk_to_cloud(self, vk_token, owner_id, album_id, clud_token, 
-                                    cloud_path, qty=None, text_log=None, p_bar=None):
+                                    cloud_path, qty=None):
         '''
         vk_token - vk access token,
         owner_id - id vk user
@@ -51,21 +54,21 @@ class LogicalLair():
         p_bar - qProgressBar object  for dysplaing startus bar in windows form
         '''
         #  VK:
-        text_log.setText('Start vk to cloud process')
+        self.changed_log.emit('Start vk to cloud process')
         vk_clien = VkClient(vk_token)
-        text_log.setText('Connection to vk')
+        self.changed_log.emit('Connection to vk')
         photo_base = vk_clien.get_photos(owner_id, album_id)
         progress = 10
-        p_bar.setProperty("value", progress)
+        self.changed_value.emit(progress)
         
         if 'response' in photo_base:
             photo_base = photo_base['response']['items']
             total_photo = len(photo_base)
-            text_log.setText(f'{total_photo} photos found')
+            self.changed_log.emit(f'{total_photo} photos found')
             # satusbar step:
             p_quant = 90/qty - 1 if qty is not None else 90/total_photo - 1   
            
-            text_log.setText('Connection to YaDrive')
+            self.changed_log.emit('Connection to YaDrive')
             # YaDrive:
             self.disck = YaDrive(clud_token)
             cp = self.disck.get_files_list(cloud_path)
@@ -73,9 +76,9 @@ class LogicalLair():
             if cp['code'] == 404:
                 # creating path to folder if it doesn't exist
                 self.disck.create_path_to_folder(cloud_path)
-            text_log.setText('Getting folder list')
+            self.changed_log.emit('Getting folder list')
             # creating or downloading information about folder:
-            files_data = self.get_status_data(cloud_path, text_log)
+            files_data = self.get_status_data(cloud_path)
             files_count = len(files_data['items'])
             # file name list for control the same file names
             tmp_photo_list = [file['file_name'] for file in files_data['items']]
@@ -94,9 +97,9 @@ class LogicalLair():
                     up_code = self.disck.upload_from_url(entry[self.get_max_res(entry)],
                                                                  photo_name, cloud_path)
                     
-                    text_log.setText(f'{photo_name} uploading to cloud')
+                    self.changed_log.emit(f'{photo_name} uploading to cloud')
                     progress += p_quant
-                    p_bar.setProperty("value", progress)
+                    self.changed_value.emit(int(progress))
 
                     if up_code == 200:
                         # change staus file
@@ -105,27 +108,27 @@ class LogicalLair():
                         if qty is not None and len(tmp_photo_list) - files_count == qty:
                             break
                     else:
-                        text_log.setText(f"can't file {photo_name} uploading to cloud")
+                        self.changed_log.emit(f"can't file {photo_name} uploading to cloud")
                 else: 
-                    text_log.setText('This files already been written to disk')
+                    self.changed_log.emit('This files already been written to disk')
         
             # uplading status file:
             files_data['last_update'] = int(time.time())
-            text_log.setText('Uploading to cloud status file')
+            self.changed_log.emit('Uploading to cloud status file')
             with open('status.json', 'w', encoding='utf-8') as f:
                 json.dump(files_data, f, indent=2)
             self.disck.upload_from_drive('status.json', cloud_path)
            
-            text_log.setText('Uploading is sucsessfull')
-            p_bar.setProperty("value", 100)
+            self.changed_log.emit('Uploading is sucsessfull')
+            self.changed_value.emit(100)
             time.sleep(5)
-            text_log.setText('ready')
-            p_bar.setProperty("value", 0)
-        elif 'error' in photo_base:
-            text_log.setText(f"error - {photo_base['error']['error_msg']}")
-        else:
-            text_log.setText('error - undefined error')
+            self.changed_log.emit('ready')
+            self.changed_value.emit(0)
 
+        elif 'error' in photo_base:
+            self.changed_log.emit(f"error - {photo_base['error']['error_msg']}")
+        else:
+            self.changed_log.emit('error - undefined error')
 
 
 class WindowsForms(QtWidgets.QMainWindow, designtwo.Ui_MainWindow):
@@ -137,6 +140,26 @@ class WindowsForms(QtWidgets.QMainWindow, designtwo.Ui_MainWindow):
         self.start_pushButton.clicked.connect(self.but_action)
         self.checkBox.clicked.connect(self.check_box_action)
         self.l_layуr = LogicalLair()
+
+
+    def make_connection_progress_bar(self, logicalLayer=None):
+        if logicalLayer is None:
+            logicalLayer = self.l_layуr
+        logicalLayer.changed_value.connect(self.get_slider_value) 
+
+    def make_connection_log(self, logicalLayer=None):
+        if logicalLayer is None:
+            logicalLayer = self.l_layуr
+        logicalLayer.changed_log.connect(self.get_log_text)
+
+    @pyqtSlot(int)
+    def get_slider_value(self, val):
+        self.progressBar.setValue(val)
+
+    @pyqtSlot(str)
+    def get_log_text(self, text):
+        self.label_9.setText(text)
+
     
     # listWidget get items; default item == profile
     def __listWidget_get_item(self):
@@ -180,6 +203,8 @@ class WindowsForms(QtWidgets.QMainWindow, designtwo.Ui_MainWindow):
 
         self.__set_settings(vk_token, vk_id, vk_album, yd_token, yd_path)
         self.progressBar.setProperty("value", 0)
+        self.make_connection_progress_bar()
+        self.make_connection_log()
 
         if self.checkBox.isChecked():
             numbe_of_photo = self.spinBox.value()
@@ -189,7 +214,7 @@ class WindowsForms(QtWidgets.QMainWindow, designtwo.Ui_MainWindow):
         upload_process_thread = \
         threading.Thread(target=self.l_layуr.transport_from_vk_to_cloud,
                      args=(vk_token, vk_id, vk_album, yd_token, yd_path, 
-                      numbe_of_photo, self.label_9, self.progressBar))
+                      numbe_of_photo))
         
         upload_process_thread.start()
 
@@ -207,5 +232,6 @@ def main():
     app.exec_() 
 
 if __name__ == '__main__':
-    main_thread = threading.Thread(target=main)
-    main_thread.start()
+    # main_thread = threading.Thread(target=main)
+    # main_thread.start()
+    main()
