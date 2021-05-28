@@ -190,10 +190,6 @@ class WindowsForms(QtWidgets.QMainWindow, design.Ui_MainWindow):
         
         upload_process_thread.start()
 
-
-        
-
-
     def check_box_action(self):
         if self.checkBox.isChecked():
             self.spinBox.setEnabled(True)
