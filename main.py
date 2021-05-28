@@ -86,10 +86,12 @@ class LogicalLair():
                 if entry['id'] not in id_list:
                     photo_name = f"{entry['likes']['count']}" + '.jpg'
                     if photo_name in tmp_photo_list:
-                        date = datetime.datetime.utcfromtimestamp(entry['date']).strftime('-%d-%m-%Y-%H-%M-%S')
+                        date = datetime.datetime.utcfromtimestamp(entry['date']\
+                                                ).strftime('-%d-%m-%Y-%H-%M-%S')
                         photo_name = f"{entry['likes']['count']}" + date + '.jpg'       
                     tmp_photo_list.append(photo_name)
-                    up_code = self.disck.upload_from_url(entry[self.get_max_res(entry)], photo_name, cloud_path)
+                    up_code = self.disck.upload_from_url(entry[self.get_max_res(entry)],
+                                                                 photo_name, cloud_path)
                     
                     text_log.setText(f'{photo_name} uploading to cloud')
                     progress += p_quant
