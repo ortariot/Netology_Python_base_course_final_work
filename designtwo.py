@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 
 class Ui_MainWindow(object):
@@ -44,7 +44,10 @@ class Ui_MainWindow(object):
         self.label_4.setObjectName("label_4")
         self.horizontalLayout_7.addWidget(self.label_4)
         self.verticalLayout_2.addWidget(self.frame_9)
-        spacerItem = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        spacerItem = QtWidgets.QSpacerItem(20, 10,
+                                           QtWidgets.QSizePolicy.Minimum,
+                                           QtWidgets.QSizePolicy.Fixed
+                                           )
         self.verticalLayout_2.addItem(spacerItem)
         self.frame_5 = QtWidgets.QFrame(self.frame_4)
         self.frame_5.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -123,7 +126,10 @@ class Ui_MainWindow(object):
         self.frame_10.setObjectName("frame_10")
         self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.frame_10)
         self.verticalLayout_7.setObjectName("verticalLayout_7")
-        spacerItem1 = QtWidgets.QSpacerItem(20, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        spacerItem1 = QtWidgets.QSpacerItem(20, 5,
+                                            QtWidgets.QSizePolicy.Minimum,
+                                            QtWidgets.QSizePolicy.Fixed
+                                            )
         self.verticalLayout_7.addItem(spacerItem1)
         self.frame_17 = QtWidgets.QFrame(self.frame_10)
         self.frame_17.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -152,7 +158,10 @@ class Ui_MainWindow(object):
         self.yd_token_textEdit.setObjectName("yd_token_textEdit")
         self.horizontalLayout_10.addWidget(self.yd_token_textEdit)
         self.verticalLayout_3.addWidget(self.frame_11)
-        spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        spacerItem2 = QtWidgets.QSpacerItem(20, 40,
+                                            QtWidgets.QSizePolicy.Minimum,
+                                            QtWidgets.QSizePolicy.Fixed
+                                            )
         self.verticalLayout_3.addItem(spacerItem2)
         self.frame_12 = QtWidgets.QFrame(self.frame_3)
         self.frame_12.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -214,8 +223,13 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "VKgrabber95 v02a2921"))
-        self.label_4.setText(_translate("MainWindow", "<html><head/><body><p><img src=\"pic/vk_logo_min.png\"/></p></body></html>"))
+        MainWindow.setWindowTitle(_translate("MainWindow",
+                                             "VKgrabber95 v02a2921"
+                                             )
+                                  )
+        self.label_4.setText(_translate("MainWindow",
+                                        "<html><head/><body><p>\
+                     <img src=\"pic/vk_logo_min.png\"/></p></body></html>"))
         self.label.setText(_translate("MainWindow", "Token"))
         self.label_2.setText(_translate("MainWindow", "User id"))
         self.label_3.setText(_translate("MainWindow", "Album"))
@@ -229,12 +243,13 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "saved"))
         self.vk_album_listWidget.setSortingEnabled(__sortingEnabled)
         self.checkBox.setText(_translate("MainWindow", "Number of photo"))
-        self.label_6.setText(_translate("MainWindow", "<html><head/><body><p><img src=\"pic/yd_logo_min.png\"/></p></body></html>"))
+        self.label_6.setText(_translate("MainWindow",
+                                        "<html><head/><body><p>\
+                     <img src=\"pic/yd_logo_min.png\"/></p></body></html>"))
         self.label_7.setText(_translate("MainWindow", "Token"))
         self.label_8.setText(_translate("MainWindow", "Path"))
         self.start_pushButton.setText(_translate("MainWindow", "Start"))
         self.label_9.setText(_translate("MainWindow", "ready"))
-
 
 
 if __name__ == "__main__":
