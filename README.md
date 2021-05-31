@@ -5,10 +5,12 @@
 ## внешние модули
 
 pyQt5
+reqursts
 
 ### для установки
 
     python -m pip install pyqt5
+    python -m pip install reqursts
 
 ## функции
 
