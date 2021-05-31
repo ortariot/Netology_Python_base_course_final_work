@@ -4,8 +4,8 @@
 
 ## внешние модули
 
-pyQt5
-reqursts
+* pyQt5
+* reqursts
 
 ### для установки
 
