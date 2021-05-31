@@ -14,9 +14,6 @@ class YaDrive:
             'Accept' : 'application/json',
             'Authorization' : f'OAuth {self.token}'
         }
-
-
-
     def get_files_list(self, path_to_cloud=None):
         if path_to_cloud is None:
             path_to_cloud = self.default_cloud_path    
@@ -46,7 +43,8 @@ class YaDrive:
         url = "https://cloud-api.yandex.net/v1/disk/resources/upload"
         headers = self.get_headers()
         params = {"path": path_to_cloud + filename, "overwrite": "true"}
-        link =  requests.get(url, headers=headers, params=params).json().get('href', None)
+        req =  requests.get(url, headers=headers, params=params)
+        link = req.get('href', None)
         if link is None:
             return 'Unable to get upload link'
         else:  
@@ -88,6 +86,7 @@ class YaDrive:
         req = requests.put(url, headers=self.get_headers(), params=params)
         return req.json()    
     
+    # creat path to folder
     def create_path_to_folder(self, path):
         if path[0] == '/':
             path = path[1 :]
